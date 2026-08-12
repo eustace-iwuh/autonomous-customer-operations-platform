@@ -1,0 +1,19 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: customer_ops_postgres
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_USER: customer_ops
+      POSTGRES_PASSWORD: customer_ops_dev_password
+      POSTGRES_DB: customer_ops
+
+    ports:
+      - "5433:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
