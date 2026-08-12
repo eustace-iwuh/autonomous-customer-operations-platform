@@ -2,18 +2,12 @@ from fastapi import FastAPI
 from sqlalchemy import text
 
 from backend.database.connection import engine
-from backend.database.models import DatabaseTest
 
 
 app = FastAPI(
     title="Autonomous Customer Operations Platform",
     version="0.1.0",
 )
-
-
-@app.on_event("startup")
-def startup():
-    DatabaseTest.metadata.create_all(bind=engine)
 
 
 @app.get("/health")
