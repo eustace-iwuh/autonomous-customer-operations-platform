@@ -1,4 +1,9 @@
 from fastapi import FastAPI
+from sqlalchemy import text
+
+from backend.database.connection import engine
+from backend.database.models import DatabaseTest
+
 
 app = FastAPI(
     title="Autonomous Customer Operations Platform",
@@ -6,9 +11,26 @@ app = FastAPI(
 )
 
 
+@app.on_event("startup")
+def startup():
+    DatabaseTest.metadata.create_all(bind=engine)
+
+
 @app.get("/health")
 def health_check():
     return {
         "status": "healthy",
         "service": "customer-operations-api",
+    }
+
+
+@app.get("/database-health")
+def database_health():
+    with engine.connect() as connection:
+        result = connection.execute(text("SELECT 1"))
+        value = result.scalar()
+
+    return {
+        "database": "connected",
+        "result": value,
     }
