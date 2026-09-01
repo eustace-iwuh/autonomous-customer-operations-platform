@@ -29,6 +29,15 @@ class ActionType(str, Enum):
     CREATE_TICKET = "CREATE_TICKET"
     ESCALATE_CASE = "ESCALATE_CASE"
 
+class ActionStatus(str, Enum):
+    PENDING = "PENDING"
+    APPROVED = "APPROVED"
+    REJECTED = "REJECTED"
+    EXECUTING = "EXECUTING"
+    SUCCEEDED = "SUCCEEDED"
+    FAILED = "FAILED"
+    CANCELLED = "CANCELLED"
+
 
 ALLOWED_TRANSITIONS: dict[CaseStatus, set[CaseStatus]] = {
     CaseStatus.RECEIVED: {
