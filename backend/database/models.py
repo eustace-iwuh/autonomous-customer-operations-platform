@@ -273,3 +273,49 @@ class Action(Base):
     case: Mapped["Case"] = relationship(
         back_populates="actions",
     )
+
+class ActionExecution(Base):
+    __tablename__ = "action_executions"
+
+    id: Mapped[int] = mapped_column(
+        primary_key=True,
+        autoincrement=True,
+    )
+
+    action_id: Mapped[int] = mapped_column(
+        ForeignKey("actions.id"),
+        nullable=False,
+        index=True,
+    )
+
+    status: Mapped[str] = mapped_column(
+        String(50),
+        nullable=False,
+        index=True,
+    )
+
+    result: Mapped[dict | None] = mapped_column(
+        JSON,
+        nullable=True,
+    )
+
+    error_message: Mapped[str | None] = mapped_column(
+        String(5000),
+        nullable=True,
+    )
+
+    started_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        nullable=False,
+    )
+
+    completed_at: Mapped[datetime | None] = mapped_column(
+        DateTime,
+        nullable=True,
+    )
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        default=datetime.utcnow,
+        nullable=False,
+    )

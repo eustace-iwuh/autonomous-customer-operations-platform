@@ -29,6 +29,7 @@ class ActionType(str, Enum):
     CREATE_TICKET = "CREATE_TICKET"
     ESCALATE_CASE = "ESCALATE_CASE"
 
+
 class ActionStatus(str, Enum):
     PENDING = "PENDING"
     APPROVED = "APPROVED"
@@ -39,7 +40,7 @@ class ActionStatus(str, Enum):
     CANCELLED = "CANCELLED"
 
 
-ALLOWED_TRANSITIONS: dict[CaseStatus, set[CaseStatus]] = {
+CASE_ALLOWED_TRANSITIONS: dict[CaseStatus, set[CaseStatus]] = {
     CaseStatus.RECEIVED: {
         CaseStatus.CLASSIFYING,
     },
@@ -92,11 +93,41 @@ ALLOWED_TRANSITIONS: dict[CaseStatus, set[CaseStatus]] = {
 }
 
 
+ACTION_ALLOWED_TRANSITIONS: dict[ActionStatus, set[ActionStatus]] = {
+    ActionStatus.PENDING: {
+        ActionStatus.APPROVED,
+        ActionStatus.REJECTED,
+        ActionStatus.CANCELLED,
+    },
+
+    ActionStatus.APPROVED: {
+        ActionStatus.EXECUTING,
+        ActionStatus.CANCELLED,
+    },
+
+    ActionStatus.EXECUTING: {
+        ActionStatus.SUCCEEDED,
+        ActionStatus.FAILED,
+    },
+
+    ActionStatus.FAILED: {
+        ActionStatus.EXECUTING,
+        ActionStatus.CANCELLED,
+    },
+
+    ActionStatus.SUCCEEDED: set(),
+
+    ActionStatus.REJECTED: set(),
+
+    ActionStatus.CANCELLED: set(),
+}
+
+
 def can_transition(
     current: CaseStatus,
     target: CaseStatus,
 ) -> bool:
-    return target in ALLOWED_TRANSITIONS.get(current, set())
+    return target in CASE_ALLOWED_TRANSITIONS.get(current, set())
 
 
 def validate_transition(
@@ -105,5 +136,27 @@ def validate_transition(
 ) -> None:
     if not can_transition(current, target):
         raise ValueError(
-            f"Invalid case transition: {current.value} -> {target.value}"
+            f"Invalid case transition: "
+            f"{current.value} -> {target.value}"
+        )
+
+
+def can_action_transition(
+    current: ActionStatus,
+    target: ActionStatus,
+) -> bool:
+    return target in ACTION_ALLOWED_TRANSITIONS.get(
+        current,
+        set(),
+    )
+
+
+def validate_action_transition(
+    current: ActionStatus,
+    target: ActionStatus,
+) -> None:
+    if not can_action_transition(current, target):
+        raise ValueError(
+            f"Invalid action transition: "
+            f"{current.value} -> {target.value}"
         )

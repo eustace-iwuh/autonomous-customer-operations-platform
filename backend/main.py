@@ -5,6 +5,7 @@ from backend.api.cases import router as cases_router
 from backend.api.customers import router as customers_router
 from backend.database.connection import engine
 from backend.api.auth import router as auth_router
+from backend.api.actions import router as actions_router
 
 app = FastAPI(
     title="Autonomous Customer Operations Platform",
@@ -14,6 +15,7 @@ app = FastAPI(
 app.include_router(auth_router)
 app.include_router(customers_router)
 app.include_router(cases_router)
+app.include_router(actions_router)
 
 
 @app.get("/health")
