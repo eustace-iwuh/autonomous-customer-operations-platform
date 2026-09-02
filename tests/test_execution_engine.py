@@ -94,3 +94,78 @@ def test_execution_engine_executes_escalate_case():
 
     assert result["success"] is True
     assert result["action_type"] == ActionType.ESCALATE_CASE.value
+
+def test_execution_engine_rejects_email_without_recipient():
+    engine = ExecutionEngine()
+
+    action = create_action(
+        ActionType.SEND_EMAIL,
+        {
+            "subject": "Test email",
+        },
+    )
+
+    try:
+        engine.execute(action)
+        assert False, "Expected ValueError"
+    except ValueError as exc:
+        assert str(exc) == "Email recipient is required."
+
+
+def test_execution_engine_rejects_email_without_subject():
+    engine = ExecutionEngine()
+
+    action = create_action(
+        ActionType.SEND_EMAIL,
+        {
+            "recipient": "customer@example.com",
+        },
+    )
+
+    try:
+        engine.execute(action)
+        assert False, "Expected ValueError"
+    except ValueError as exc:
+        assert str(exc) == "Email subject is required."
+
+def test_execution_engine_rejects_empty_customer_update():
+    engine = ExecutionEngine()
+
+    action = create_action(
+        ActionType.UPDATE_CUSTOMER,
+        {},
+    )
+
+    try:
+        engine.execute(action)
+        assert False, "Expected ValueError"
+    except ValueError as exc:
+        assert str(exc) == "Customer update fields are required."
+
+def test_execution_engine_rejects_ticket_without_subject():
+    engine = ExecutionEngine()
+
+    action = create_action(
+        ActionType.CREATE_TICKET,
+        {},
+    )
+
+    try:
+        engine.execute(action)
+        assert False, "Expected ValueError"
+    except ValueError as exc:
+        assert str(exc) == "Ticket subject is required."
+
+def test_execution_engine_rejects_escalation_without_reason():
+    engine = ExecutionEngine()
+
+    action = create_action(
+        ActionType.ESCALATE_CASE,
+        {},
+    )
+
+    try:
+        engine.execute(action)
+        assert False, "Expected ValueError"
+    except ValueError as exc:
+        assert str(exc) == "Escalation reason is required."

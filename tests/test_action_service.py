@@ -232,6 +232,7 @@ def test_action_service_executes_approved_action():
             action_type=ActionType.SEND_EMAIL,
             payload={
                 "recipient": "customer@example.com",
+                "subject": "Test customer email",
             },
         )
 
@@ -370,6 +371,7 @@ def test_action_service_records_execution_history():
             action_type=ActionType.SEND_EMAIL,
             payload={
                 "recipient": "test@example.com",
+                "subject": "Test execution email",
             },
         )
 
@@ -517,7 +519,8 @@ def test_action_service_lists_execution_history():
             action_type=ActionType.SEND_EMAIL,
             payload={
                 "recipient": "test@example.com",
-            },
+                "subject": "Test execution history email",
+            }, 
         )
 
         action.status = ActionStatus.APPROVED.value

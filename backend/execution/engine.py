@@ -31,10 +31,25 @@ class ExecutionEngine:
         self,
         action: Action,
     ) -> dict[str, Any]:
+        recipient = action.payload.get("recipient")
+        subject = action.payload.get("subject")
+
+        if not recipient:
+            raise ValueError(
+                "Email recipient is required."
+            )
+
+        if not subject:
+            raise ValueError(
+                "Email subject is required."
+            )
+
         return {
             "success": True,
             "action_type": ActionType.SEND_EMAIL.value,
             "message": "Email execution simulated successfully.",
+            "recipient": recipient,
+            "subject": subject,
         }
 
     def _execute_issue_refund(
@@ -64,28 +79,53 @@ class ExecutionEngine:
         self,
         action: Action,
     ) -> dict[str, Any]:
+        updates = action.payload
+
+        if not updates:
+            raise ValueError(
+                "Customer update fields are required."
+            )
+
         return {
             "success": True,
             "action_type": ActionType.UPDATE_CUSTOMER.value,
             "message": "Customer update execution simulated successfully.",
+            "updated_fields": updates,
         }
 
     def _execute_create_ticket(
         self,
         action: Action,
     ) -> dict[str, Any]:
+        subject = action.payload.get("subject")
+
+        if not subject:
+            raise ValueError(
+                "Ticket subject is required."
+            )
+
         return {
             "success": True,
             "action_type": ActionType.CREATE_TICKET.value,
             "message": "Ticket creation simulated successfully.",
+            "subject": subject,
         }
+
 
     def _execute_escalate_case(
         self,
         action: Action,
     ) -> dict[str, Any]:
+        reason = action.payload.get("reason")
+
+        if not reason:
+            raise ValueError(
+                "Escalation reason is required."
+            )
+
         return {
             "success": True,
             "action_type": ActionType.ESCALATE_CASE.value,
             "message": "Case escalation simulated successfully.",
+            "reason": reason,
         }

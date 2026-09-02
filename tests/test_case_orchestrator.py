@@ -267,6 +267,7 @@ def test_orchestrator_executes_only_approved_actions():
             status=ActionStatus.PENDING.value,
             payload={
                 "recipient": "pending@example.com",
+                "subject": "Pending test email",
             },
         )
 
@@ -276,6 +277,7 @@ def test_orchestrator_executes_only_approved_actions():
             status=ActionStatus.APPROVED.value,
             payload={
                 "recipient": "approved@example.com",
+                "subject": "Approved test email",
             },
         )
 
@@ -471,7 +473,7 @@ def test_orchestrator_marks_case_failed_when_action_fails():
 
         assert events[-1].event_type == "CASE_STATUS_CHANGED"
         assert events[-1].payload["new_status"] == CaseStatus.FAILED.value
-        
+
         assert len(result["results"]) == 1
         assert result["results"][0]["action_id"] == action.id
         assert (
