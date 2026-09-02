@@ -9,8 +9,8 @@ from backend.api.dependencies import (
 from backend.database.connection import get_db
 from backend.database.models import User
 from backend.domain.states import CasePriority, CaseStatus
+from backend.services.case_orchestrator import CaseOrchestrator
 from backend.services.case_service import CaseService
-
 
 router = APIRouter(prefix="/cases", tags=["cases"])
 
@@ -45,6 +45,22 @@ class CaseResponse(BaseModel):
     status: str
     priority: str
 
+class CaseActionResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    case_id: int
+    action_type: str
+    status: str
+    payload: dict
+    result: dict | None
+
+
+class ExecuteCaseResponse(BaseModel):
+    case_id: int
+    actions_processed: int
+    results: list[dict]
+
 
 @router.post(
     "",
@@ -76,7 +92,60 @@ def create_case(
         db.rollback()
         raise
 
+@router.get(
+    "/{case_id}/actions",
+    response_model=list[CaseActionResponse],
+)
+def get_case_actions(
+    case_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    orchestrator = CaseOrchestrator(db)
 
+    try:
+        return orchestrator.get_actions(case_id)
+
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
+        )
+
+
+@router.post(
+    "/{case_id}/execute",
+    response_model=ExecuteCaseResponse,
+)
+def execute_case(
+    case_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    orchestrator = CaseOrchestrator(db)
+
+    try:
+        result = orchestrator.execute_approved_actions(
+            case_id=case_id,
+        )
+
+        db.commit()
+
+        return result
+
+    except ValueError as exc:
+        db.rollback()
+
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
+        )
+
+    except Exception:
+        db.rollback()
+        raise
+
+        
 @router.post(
     "/{case_id}/transition",
     response_model=CaseResponse,

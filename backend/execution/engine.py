@@ -41,10 +41,23 @@ class ExecutionEngine:
         self,
         action: Action,
     ) -> dict[str, Any]:
+        amount = action.payload.get("amount")
+
+        if amount is None:
+            raise ValueError(
+                "Refund amount is required."
+            )
+
+        if amount <= 0:
+            raise ValueError(
+                "Refund amount must be greater than zero."
+            )
+
         return {
             "success": True,
             "action_type": ActionType.ISSUE_REFUND.value,
             "message": "Refund execution simulated successfully.",
+            "amount": amount,
         }
 
     def _execute_update_customer(
