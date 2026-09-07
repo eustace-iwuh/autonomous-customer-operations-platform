@@ -120,26 +120,13 @@ class ActionService:
         )
 
         self.db.add(execution)
-        self.db.flush()
 
         action.status = ActionStatus.EXECUTING.value
+
         self.db.flush()
 
         try:
             result = self.execution_engine.execute(action)
-
-            completed_at = datetime.utcnow()
-
-            execution.status = ActionStatus.SUCCEEDED.value
-            execution.result = result
-            execution.completed_at = completed_at
-
-            action.status = ActionStatus.SUCCEEDED.value
-            action.result = result
-
-            self.db.flush()
-
-            return action
 
         except Exception as exc:
             completed_at = datetime.utcnow()
@@ -156,6 +143,19 @@ class ActionService:
 
             self.db.flush()
 
+            return action
+
+        completed_at = datetime.utcnow()
+
+        execution.status = ActionStatus.SUCCEEDED.value
+        execution.result = result
+        execution.completed_at = completed_at
+
+        action.status = ActionStatus.SUCCEEDED.value
+        action.result = result
+
+        self.db.flush()
+
         return action
 
     def list_execution_history(
@@ -169,3 +169,4 @@ class ActionService:
             .order_by(ActionExecution.created_at.asc())
             .all()
         )
+
